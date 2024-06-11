@@ -30,12 +30,18 @@ public class TcpServer extends Thread implements Closeable {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                 while (true) {
                     String line = reader.readLine();
+                    byte[] outdata = null;
                     try {
                         output.write(shell.processCommand(line));
+                         outdata = shell.processCommand(line);
                     } catch (Exception e) {
                         logger.error("Error processing command {}: {}", line, e.toString());
                     }
                     output.flush();
+                    if (outdata != null) {
+                        output.write(outdata);
+                        output.flush();
+                    }
                 }
             } catch (Exception e) {
                 logger.error(e.toString());
@@ -58,9 +64,11 @@ public class TcpServer extends Thread implements Closeable {
     @Override
     public void run() {
         try {
-            Socket socket = serverSocket.accept();
-            logger.info("Got new connection from {}", socket.getInetAddress());
-            new SocketThread(socket);
+            while (true) {
+                Socket socket = serverSocket.accept();
+                logger.info("Got new connection from {}", socket.getInetAddress());
+                new SocketThread(socket);
+            }
         } catch (Exception e) {
             logger.error(e.toString());
         }
