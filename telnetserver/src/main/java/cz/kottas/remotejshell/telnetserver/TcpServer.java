@@ -32,12 +32,10 @@ public class TcpServer extends Thread implements Closeable {
                     String line = reader.readLine();
                     byte[] outdata = null;
                     try {
-                        output.write(shell.processCommand(line));
                          outdata = shell.processCommand(line);
                     } catch (Exception e) {
                         logger.error("Error processing command {}: {}", line, e.toString());
                     }
-                    output.flush();
                     if (outdata != null) {
                         output.write(outdata);
                         output.flush();
